@@ -3,3 +3,15 @@ dist/
 .sites-runtime/
 .wrangler/
 .next/
+.vite/
+*.log
+.env
+.env.*
+!.env.example
+
+# Technical source data must remain outside this repository.
+data/raw/
+data/private/
+
+# Detailed local source inventory can expose confidential document names.
+docs/inventory/*.csv

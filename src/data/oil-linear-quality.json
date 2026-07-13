@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "dataset": "Óleo Linear",
+    "sourceFile": "Óleo Linear (1).xlsx",
+    "sourceSha256": "86450d0124da93d3d36c56115040942eff9d46f4cf8dc70783cbbd6e5ed08be3",
+    "sheet": "Export",
+    "generatedAt": "2026-07-13T08:10:24.932417+00:00",
+    "status": "Em validação",
+    "containsRawMeasurements": false
+  },
+  "grain": "Uma linha por TAG e intervalo diário de medição",
+  "profile": {
+    "rows": 876,
+    "columns": 114,
+    "tags": 4,
+    "measurementDateStart": "2025-11-28T00:00:00",
+    "measurementDateEnd": "2026-07-07T00:00:00",
+    "periodEndExclusive": "2026-07-08T00:00:00"
+  },
+  "checks": {
+    "compositeKey": "TAG + início do período + fim do período",
+    "duplicateRows": 0,
+    "duplicateRate": 0.0,
+    "volumeZeroRows": 376,
+    "volumeZeroRate": 42.92,
+    "pressureTemperatureZeroRows": 397,
+    "pressureTemperatureZeroRate": 45.32
+  },
+  "classifications": [
+    {
+      "code": "missing_required",
+      "label": "Campos obrigatórios ausentes",
+      "status": "Ausente",
+      "severity": "critical",
+      "rule": "TAG, período e três volumes precisam estar preenchidos.",
+      "count": 0,
+      "rate": 0.0
+    },
+    {
+      "code": "instrument_failure_flag",
+      "label": "Falha instrumental registrada",
+      "status": "Em validação",
+      "severity": "high",
+      "rule": "Ao menos um estado de falha está explicitamente ativo na fonte.",
+      "count": 0,
+      "rate": 0.0
+    },
+    {
+      "code": "flow_with_pt_zero",
+      "label": "Fluxo com P/T iguais a zero",
+      "status": "Em validação",
+      "severity": "high",
+      "rule": "Há volume no período, mas temperatura e pressão são zero; investigar falha, substituição ou dado congelado.",
+      "count": 21,
+      "rate": 2.4
+    },
+    {
+      "code": "zero_stable_totalizer_pt_zero",
+      "label": "Zero com totalizador estável e P/T zero",
+      "status": "Não avaliável",
+      "severity": "medium",
+      "rule": "Candidato a sem fluxo, fora de operação ou ponto não selecionado; zero não é classificado como falha automaticamente.",
+      "count": 376,
+      "rate": 42.92
+    },
+    {
+      "code": "zero_stable_totalizer_pt_present",
+      "label": "Zero com totalizador estável e P/T presentes",
+      "status": "Em validação",
+      "severity": "medium",
+      "rule": "Candidato a sem fluxo ou ponto não selecionado; requer evidência operacional.",
+      "count": 0,
+      "rate": 0.0
+    },
+    {
+      "code": "zero_other",
+      "label": "Zero sem causa determinada",
+      "status": "Em validação",
+      "severity": "high",
+      "rule": "Volumes iguais a zero sem combinação conclusiva; revisar totalizadores, estados e alinhamento.",
+      "count": 0,
+      "rate": 0.0
+    },
+    {
+      "code": "normal_operating",
+      "label": "Leitura com volume e P/T presentes",
+      "status": "Derivado",
+      "severity": "info",
+      "rule": "Classificação estrutural; não equivale a conformidade metrológica.",
+      "count": 479,
+      "rate": 54.68
+    }
+  ],
+  "byTag": [
+    {
+      "tag": "13FT1703",
+      "rows": 219,
+      "zeroRows": 160,
+      "zeroRate": 73.06,
+      "flowWithPtZeroRows": 3,
+      "failureFlagRows": 0,
+      "status": "Em validação"
+    },
+    {
+      "tag": "20FT2303",
+      "rows": 219,
+      "zeroRows": 38,
+      "zeroRate": 17.35,
+      "flowWithPtZeroRows": 1,
+      "failureFlagRows": 0,
+      "status": "Em validação"
+    },
+    {
+      "tag": "20FT2353",
+      "rows": 219,
+      "zeroRows": 75,
+      "zeroRate": 34.25,
+      "flowWithPtZeroRows": 11,
+      "failureFlagRows": 0,
+      "status": "Em validação"
+    },
+    {
+      "tag": "20FT2403",
+      "rows": 219,
+      "zeroRows": 103,
+      "zeroRate": 47.03,
+      "flowWithPtZeroRows": 6,
+      "failureFlagRows": 0,
+      "status": "Em validação"
+    }
+  ],
+  "limitations": [
+    "As categorias de zero são hipóteses auditáveis, não causas operacionais confirmadas.",
+    "A classificação final depende de alinhamento, estado operacional, seleção do ponto e evidência de falha/substituição.",
+    "Nenhum indicador desta análise autoriza o uso do rótulo Conforme."
+  ]
+}

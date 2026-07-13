@@ -1,0 +1,139 @@
+.sourceBanner {
+  align-items: center;
+  background: linear-gradient(110deg, #071b43, #0d2e62);
+  border-radius: 8px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding: 18px 20px;
+}
+
+.sourceBanner div {
+  display: grid;
+  gap: 4px;
+}
+
+.sourceBanner span,
+.sourceBanner small {
+  color: #b8c9df;
+  font-size: 10px;
+}
+
+.sourceBanner b {
+  font-size: 15px;
+}
+
+.qualityGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.qualityTable {
+  overflow-x: auto;
+}
+
+.qualityTable .title {
+  margin-bottom: 12px;
+}
+
+.qualityRules {
+  background: #fff;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.qualityRules > h3 {
+  font-size: 14px;
+  margin: 0 0 14px;
+}
+
+.qualityRule {
+  align-items: start;
+  border-top: 1px solid #edf0f2;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 38px 1fr;
+  padding: 14px 0;
+}
+
+.qualityRule > span {
+  background: #fff3dd;
+  border-radius: 6px;
+  color: #a36700;
+  display: grid;
+  font-size: 12px;
+  font-weight: 700;
+  min-height: 34px;
+  place-items: center;
+}
+
+.qualityRule.high > span,
+.qualityRule.critical > span {
+  background: #fff0f3;
+  color: #d91b42;
+}
+
+.qualityRule.info > span {
+  background: #e9f7f1;
+  color: #147b59;
+}
+
+.qualityRule b {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.qualityRule p {
+  color: #66717d;
+  font-size: 10px;
+  line-height: 1.45;
+  margin: 0 0 6px;
+}
+
+.qualityRule small {
+  color: #8a94a2;
+  font-size: 9px;
+}
+
+.qualityNotice {
+  align-items: flex-start;
+  background: #f3f6fa;
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  display: flex;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 16px 18px;
+}
+
+.qualityNotice > svg {
+  color: #0d4c91;
+  flex: 0 0 auto;
+}
+
+.qualityNotice b {
+  font-size: 12px;
+}
+
+.qualityNotice p {
+  color: #596579;
+  font-size: 10px;
+  margin: 5px 0 0;
+}
+
+@media (max-width: 1180px) {
+  .qualityGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .sourceBanner {
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
