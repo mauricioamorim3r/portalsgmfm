@@ -1,0 +1,12 @@
+.tabs{display:flex;gap:8px;margin:6px 0 14px;border-bottom:1px solid #e1e5e9}
+.tabs button{border:0;background:transparent;color:#657184;padding:12px 14px;cursor:pointer;font-weight:600}
+.tabs button.on{color:#ef1743;border-bottom:2px solid #ef1743}
+.recordCount{font-size:10px;color:#657184;background:#f2f4f6;padding:6px 9px;border-radius:20px}
+.pendingGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.task{background:#fff;border:1px solid #dfe3e8;border-radius:8px;padding:16px;display:grid;grid-template-columns:8px 1fr auto;gap:12px;align-items:center}
+.task>span{width:8px;height:36px;border-radius:8px;background:#f3b817}
+.task div{display:flex;flex-direction:column}
+.task b{font-size:12px}
+.task small{font-size:10px;color:#738091;margin-top:5px}
+.task em{font-style:normal;font-size:9px;background:#fff3dd;color:#9a6500;padding:5px 7px;border-radius:4px}
+@media(max-width:760px){.pendingGrid{grid-template-columns:1fr}.tabs{overflow:auto}.tabs button{white-space:nowrap}}
