@@ -1,63 +1,140 @@
 "use client";
-import React,{useState} from 'react';import{LayoutDashboard,Gauge,Workflow,ShieldCheck,Files,Search,Download,ChevronRight,Activity,BookOpen,PanelLeftClose,Shield,CalendarDays,TriangleAlert,Radio,TowerControl,Factory,Server,Database,MapPinned,Waves,CalendarRange,ListTodo,ClipboardCheck,Clock3,CircleCheck,Filter,ChartNoAxesCombined}from'lucide-react';import{LineChart,Line,ResponsiveContainer,XAxis,YAxis,Tooltip,CartesianGrid,ReferenceLine}from'recharts';
-import oilLinearQuality from '../src/data/oil-linear-quality.json';
-import './data-quality.css';
-const trend=[{m:'26/abr',d:96.2},{m:'28/abr',d:95.7},{m:'30/abr',d:95.9},{m:'02/mai',d:92.8},{m:'04/mai',d:94.6},{m:'06/mai',d:97.5},{m:'08/mai',d:96.4},{m:'10/mai',d:96.8},{m:'12/mai',d:98},{m:'14/mai',d:97.2},{m:'16/mai',d:98.6},{m:'18/mai',d:97.4},{m:'20/mai',d:98.7},{m:'22/mai',d:97.4},{m:'24/mai',d:98}];
-const nav=[['Visão geral',LayoutDashboard],['Agenda regulatória',CalendarRange],['Tarefas',ListTodo],['Cadastros',Database],['Qualidade dos dados',ChartNoAxesCombined],['Desempenho MPFM',Gauge],['Processos',Workflow],['Rastreabilidade',ShieldCheck],['Documentos',Files]];
-const events=[['16/jul','PE-02','Preparar campanha/dados','Crítica','Em preparação','Eng. Medição'],['16/jul','PE-04','Preparar campanha/dados','Crítica','Em preparação','Eng. Medição'],['19/jul','PE-02','D−15 — concluir minuta','Crítica','Planejada','Gestão SGM'],['19/jul','PE-04','D−15 — concluir minuta','Crítica','Planejada','Gestão SGM'],['21/jul','PE-02','Relatório de 180 dias','Crítica','Em preparação','Gestão SGM'],['21/jul','PE-04','Relatório de 180 dias','Crítica','Em preparação','Gestão SGM'],['24/jul','Riser-P4','D+30 — relatório de avaliação','Alta','Pendente','Eng. Medição'],['29/jul','PE-02','D−5 — aprovação final','Crítica','Planejada','Gestão SGM'],['29/jul','PE-04','D−5 — aprovação final','Crítica','Planejada','Gestão SGM'],['02/ago','PE-02','Fechamento do período de 180 dias','Crítica','Planejada','Gestão SGM'],['02/ago','PE-04','Fechamento do ciclo de 180 dias','Crítica','Planejada','Eng. Medição'],['03/ago','PE-02','D+180 — protocolo máximo','Crítica','Em preparação','Gestão SGM'],['03/ago','PE-04','D+180 — protocolo máximo','Crítica','Em preparação','Gestão SGM'],['21/ago','PW-104','Preparar relatório de 180 dias','Alta','Planejada','Gestão SGM'],['10/set','PW-104','D+180 — protocolo máximo','Alta','Planejada','Gestão SGM']];
-const taskRows=[['Consolidar dados MPFM PE-02','Campanha e reconciliação','16/jul','Eng. Medição','Em andamento'],['Consolidar dados MPFM PE-04','Campanha e reconciliação','16/jul','Eng. Medição','Em andamento'],['Concluir minuta PE-02','Relatório 180 dias','19/jul','Gestão SGM','A fazer'],['Concluir minuta PE-04','Relatório 180 dias','19/jul','Gestão SGM','A fazer'],['Validar suficiência do relatório Riser-P4','D+30','24/jul','Eng. Medição','Bloqueada'],['Aprovação final PE-02','Protocolo regulatório','29/jul','Gestão SGM','A fazer'],['Aprovação final PE-04','Protocolo regulatório','29/jul','Gestão SGM','A fazer']];
-const assets=[['18FT0506','PE_2','MPFM Subsea','Multifásico','Em validação'],['18FT1506','PE_4','MPFM Subsea','Multifásico','Em validação'],['18FT1106','PW-104DA','MPFM Subsea','Multifásico','Em validação'],['13FT0217','Riser_P2','MPFM Topside','Multifásico','Cadastrado'],['13FT0317','Riser_P4','MPFM Topside','Multifásico','Cadastrado'],['13FT0367','Riser_P5','MPFM Topside','Multifásico','Cadastrado'],['20FT0247','Separador de Teste','Óleo','Mássico/volumétrico','Cadastrado'],['20FT0244','Separador de Teste','Gás','Volumétrico/mássico','Cadastrado'],['20FT0251','Separador de Teste','Água','Mássico/volumétrico','Cadastrado']];
-const sources=[['Campos.xlsx','4 campos','Cadastro mestre','Validado'],['Instalações.xlsx','1 instalação','Cadastro mestre','Validado'],['Poços.xlsx','43 poços','Cadastro mestre','Requer aliases'],['Pontos de Medição.xlsx','71 TAGs','Cadastro mestre','Validado'],['Dados do Ponto de Medição.xlsx','1 TAG detalhada','Detalhamento','Parcial'],['MPFM_JUN_2026','4.200 registros','Medição','Carregado'],['MPFM_JUL_2026','1.409 registros até 11/jul','Medição','Carregado'],['Óleo Linear (1).xlsx','876 registros · 4 TAGs','Qualidade e ingestão','Em validação'],['SEP Jun–Jul 2026','41 dias até 11/jul','Referência','Sem alinhamento']];
-const reqs=[['RANP44-8.4','Avaliação periódica de desempenho','EVD-PE04-2026-01','Conforme'],['RANP44-8.5','Comparação com referência','CAL-PE04-007','Conforme'],['RANP44-8.6','Registro de desvios e ações','PA-SGM-014','Em análise'],['SGM-WR-2865','Governança e rastreabilidade','REG-MENSAL-06','Conforme']];
-function App(){
-  const[page,setPage]=useState('Visão geral');
-  const[q,setQ]=useState('');
-  const screens={
-    'Visão geral':<Overview go={setPage}/>,
-    'Agenda regulatória':<RegCalendar/>,
-    'Tarefas':<Tasks/>,
-    'Cadastros':<Cadastros q={q}/>,
-    'Qualidade dos dados':<DataQuality/>,
-    'Desempenho MPFM':<Performance/>,
-    'Processos':<Processes/>,
-    'Rastreabilidade':<Trace/>,
-    'Documentos':<Docs q={q}/>
-  };
-  return <div className="app"><aside><div className="brand"><span>e</span><div><b>SGM</b><small>Measurement management</small></div></div><nav>{nav.map(([n,I])=><button key={n} className={page===n?'active':''} onClick={()=>setPage(n)}><I size={19}/><span>{n}</span></button>)}</nav><div className="asideFoot"><Activity size={18}/><div><b>Ambiente restrito</b><small>Base técnica · revisão 2</small></div></div></aside><main><header><div><h1>{page}</h1><p>Portal integrado do Sistema de Gestão de Medição</p></div><div className="search"><Search size={18}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar requisito, TAG ou documento"/></div><button className="icon" aria-label="Recolher menu"><PanelLeftClose size={20}/></button></header>{screens[page]}</main></div>
+
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Activity, ChartNoAxesCombined, Database, Factory, Gauge, LayoutDashboard,
+  PanelLeftClose, Radio, Search, ShieldCheck, TriangleAlert, Waves,
+} from "lucide-react";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import "./data-quality.css";
+
+const nav = [
+  ["Visão geral", LayoutDashboard],
+  ["Cadastros", Database],
+  ["Qualidade dos dados", ChartNoAxesCombined],
+  ["Desempenho MPFM", Gauge],
+  ["Rastreabilidade", ShieldCheck],
+];
+
+const formatNumber = (value) => Number(value || 0).toLocaleString("pt-BR");
+const formatDate = (value) => {
+  if (!value) return "—";
+  const date = new Date(`${String(value).slice(0, 10)}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) ? String(value) : new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(date);
+};
+
+function App() {
+  const [page, setPage] = useState("Visão geral");
+  const [query, setQuery] = useState("");
+  const [state, setState] = useState({ loading: true, data: null, error: "" });
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/portal-data", { headers: { accept: "application/json" }, cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok || payload.status !== "ok") throw new Error(payload.error || "Base real indisponível.");
+        if (active) setState({ loading: false, data: payload, error: "" });
+      })
+      .catch((error) => active && setState({ loading: false, data: null, error: error.message }));
+    return () => { active = false; };
+  }, []);
+
+  const content = state.loading
+    ? <DataState title="Consultando a base real" detail="Carregando cadastros, medições e rastreabilidade do D1." />
+    : state.error
+      ? <DataState title="Base real indisponível" detail={state.error} warning />
+      : ({
+          "Visão geral": <Overview data={state.data} />,
+          "Cadastros": <Cadastros data={state.data} query={query} />,
+          "Qualidade dos dados": <DataQuality data={state.data} />,
+          "Desempenho MPFM": <Performance data={state.data} />,
+          "Rastreabilidade": <Trace data={state.data} />,
+        })[page];
+
+  return <div className="app">
+    <aside>
+      <div className="brand"><span>e</span><div><b>SGM</b><small>Measurement management</small></div></div>
+      <nav>{nav.map(([name, Icon]) => <button key={name} className={page === name ? "active" : ""} onClick={() => setPage(name)}><Icon size={19}/><span>{name}</span></button>)}</nav>
+      <div className="asideFoot"><Activity size={18}/><div><b>Ambiente restrito</b><small>Somente fontes reais</small></div></div>
+    </aside>
+    <main>
+      <header><div><h1>{page}</h1><p>Portal integrado do Sistema de Gestão de Medição</p></div><div className="search"><Search size={18}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar TAG, poço ou arquivo"/></div><button className="icon" aria-label="Recolher menu"><PanelLeftClose size={20}/></button></header>
+      {content}
+    </main>
+  </div>;
 }
 
-function Cadastros({q}){const[tab,setTab]=useState('Ativos');const filtered=assets.filter(r=>r.join(' ').toLowerCase().includes(q.toLowerCase()));return <section className="content"><div className="intro"><div><h2>Cadastros técnicos <small>Base controlada</small></h2><p>Inventário normalizado com origem, situação e pendências de relacionamento.</p></div></div><div className="metrics"><Metric icon={MapPinned} n="4" l="Campos" s="Bacalhau, Bacalhau Norte, Raia e Raia Pintada"/><Metric icon={Factory} n="1" l="Instalação" s="FPSO Bacalhau · ativo"/><Metric icon={Waves} n="43" l="Poços" s="3 produtores · aliases em revisão"/><Metric icon={Radio} n="71" l="Pontos de medição" s="17 multifásicos · 27 sem incerteza"/></div><div className="tabs"><button className={tab==='Ativos'?'on':''} onClick={()=>setTab('Ativos')}>Ativos e instrumentos</button><button className={tab==='Fontes'?'on':''} onClick={()=>setTab('Fontes')}>Fontes e cobertura</button><button className={tab==='Pendências'?'on':''} onClick={()=>setTab('Pendências')}>Pendências</button></div>{tab==='Ativos'?<div className="panel"><div className="title"><div><h3>Cadeia MPFM e separador</h3><p>Vínculos inferidos ficam “Em validação” até confirmação operacional.</p></div><span className="recordCount">{filtered.length} registros</span></div><table><thead><tr><th>TAG</th><th>Entidade / serviço</th><th>Local</th><th>Medição</th><th>Situação</th></tr></thead><tbody>{filtered.map(r=><tr key={r[0]}>{r.map((v,i)=><td key={i}>{i===4?<mark className={v==='Em validação'?'warn':''}>{v}</mark>:v}</td>)}</tr>)}</tbody></table></div>:tab==='Fontes'?<div className="panel"><table><thead><tr><th>Fonte</th><th>Cobertura</th><th>Uso</th><th>Situação</th></tr></thead><tbody>{sources.map(r=><tr key={r[0]}>{r.map((v,i)=><td key={i}>{i===3?<mark className={/Parcial|aliases|Sem|validação/.test(v)?'warn':''}>{v}</mark>:v}</td>)}</tr>)}</tbody></table></div>:<div className="pendingGrid"><Task t="Mapa de alinhamento temporal" d="Poço → MPFM → riser/banco → separador por intervalo" c="Crítico"/><Task t="Detalhamento dos 17 MPFMs" d="Fabricante, modelo, serial, faixa, incerteza e computador de vazão" c="Pendente"/><Task t="Dicionário oficial de aliases" d="Ex.: PE-4A ↔ PE_4 e nomes ANP/operacionais" c="Pendente"/><Task t="Certificados e validade" d="Instrumentos primários, sensores P/T e referências" c="Pendente"/><Task t="PVT e BSW por campanha" d="Amostra, método, laboratório, relatório e validade" c="Parcial"/><Task t="Óleo Linear" d="Arquivo válido recebido; classificação dos zeros em validação" c="Em andamento"/></div>}</section>}
-function DataQuality(){
-  const{meta,profile,checks,classifications,byTag,limitations}=oilLinearQuality;
-  const date=value=>new Intl.DateTimeFormat('pt-BR',{timeZone:'UTC'}).format(new Date(value));
-  const activeRules=classifications.filter(item=>item.count>0);
-  return <section className="content dataQuality">
-    <div className="intro"><div><h2>Qualidade dos dados <small>{meta.status}</small></h2><p>Perfil agregado do Óleo Linear. Nenhuma medição bruta ou número de série foi incorporado ao portal.</p></div></div>
-    <div className="sourceBanner"><div><span>Fonte controlada</span><b>{meta.sourceFile}</b><small>Aba {meta.sheet} · corte de {date(profile.measurementDateStart)} a {date(profile.measurementDateEnd)}</small></div><mark className="warn">Em validação</mark></div>
+function SourceBanner({ data }) {
+  const summary = data.measurements.summary;
+  return <div className="sourceBanner"><div><span>Base operacional real</span><b>{formatNumber(summary.measurement_rows)} registros MPFM · {formatNumber(data.separator.rows)} registros do separador</b><small>Corte de {formatDate(summary.period_start)} a {formatDate(summary.period_end)} · {data.sources.length} fontes registradas</small></div><mark>Carregado</mark></div>;
+}
+
+function Overview({ data }) {
+  const { summary, dailyTrend, latestByTag } = data.measurements;
+  return <section className="content overview">
+    <div className="intro"><div><h2>Visão geral <small>Dados importados</small></h2><p>Indicadores calculados exclusivamente sobre os arquivos rastreados na base.</p></div></div>
+    <SourceBanner data={data}/>
     <div className="metrics">
-      <Metric icon={Database} n={profile.rows.toLocaleString('pt-BR')} l="Linhas úteis" s={`${profile.columns} colunas · ${profile.tags} TAGs`}/>
-      <Metric icon={ShieldCheck} n={`${checks.duplicateRate.toLocaleString('pt-BR')}%`} l="Duplicidade da chave" s="TAG + início + fim"/>
-      <Metric icon={Waves} n={`${checks.volumeZeroRate.toLocaleString('pt-BR')}%`} l="Volumes iguais a zero" s={`${checks.volumeZeroRows} linhas · causa não presumida`}/>
-      <Metric icon={TriangleAlert} n={`${checks.pressureTemperatureZeroRate.toLocaleString('pt-BR')}%`} l="P/T iguais a zero" s={`${checks.pressureTemperatureZeroRows} linhas · requer contexto`} danger/>
+      <Metric icon={Database} n={formatNumber(summary.measurement_rows)} l="Registros MPFM" s={`${formatNumber(summary.hourly_rows)} horários · ${formatNumber(summary.daily_rows)} diários`}/>
+      <Metric icon={Radio} n={formatNumber(summary.measured_tags)} l="TAGs com medição" s={`Último dia: ${formatDate(summary.period_end)}`}/>
+      <Metric icon={Factory} n={formatNumber(data.separator.days)} l="Dias de separador" s={`${formatNumber(data.separator.rows)} linhas · ${formatNumber(data.separator.phases)} fases`}/>
+      <Metric icon={TriangleAlert} n={formatNumber(data.quality.partial_hours)} l="Dias/TAG parciais" s="Cobertura entre 1 e 23 horas" danger={Number(data.quality.partial_hours) > 0}/>
     </div>
-    <div className="qualityGrid">
-      <article className="panel qualityTable"><div className="title"><div><h3>Cobertura e zeros por TAG</h3><p>Zero é sinal de qualidade a investigar, não conclusão automática de falha.</p></div></div><table><thead><tr><th>TAG</th><th>Linhas</th><th>Volumes zero</th><th>Taxa</th><th>Fluxo com P/T zero</th><th>Situação</th></tr></thead><tbody>{byTag.map(row=><tr key={row.tag}><td><b>{row.tag}</b></td><td>{row.rows}</td><td>{row.zeroRows}</td><td>{row.zeroRate.toLocaleString('pt-BR')}%</td><td>{row.flowWithPtZeroRows}</td><td><mark className="warn">{row.status}</mark></td></tr>)}</tbody></table></article>
-      <aside className="qualityRules"><h3>Regras de classificação</h3>{activeRules.map(item=><div className={`qualityRule ${item.severity}`} key={item.code}><span>{item.count}</span><div><b>{item.label}</b><p>{item.rule}</p><small>{item.rate.toLocaleString('pt-BR')}% · {item.status}</small></div></div>)}</aside>
+    <div className="dashGrid">
+      <article className="chart"><div className="title"><div><h3>Produção diária registrada</h3><p>Massas oficiais encontradas nas linhas Daily, sem substituição por Hourly.</p></div></div>
+        {dailyTrend.length ? <ResponsiveContainer width="100%" height={250}><LineChart data={dailyTrend}><CartesianGrid stroke="#e8ebef" vertical={false}/><XAxis dataKey="day" tickFormatter={(v) => formatDate(v).slice(0, 5)} fontSize={10}/><YAxis fontSize={10}/><Tooltip labelFormatter={formatDate}/><Legend/><Line type="monotone" dataKey="oil_t" name="Óleo (t)" stroke="#ff1243" dot={false}/><Line type="monotone" dataKey="gas_t" name="Gás (t)" stroke="#315f9b" dot={false}/><Line type="monotone" dataKey="water_t" name="Água (t)" stroke="#00a6a6" dot={false}/></LineChart></ResponsiveContainer> : <EmptyRows/>}
+      </article>
+      <article className="panel"><div className="title"><div><h3>Último dia por TAG</h3><p>Daily e cobertura horária permanecem identificados separadamente.</p></div></div><MeasurementTable rows={latestByTag}/></article>
     </div>
-    <div className="qualityNotice"><ShieldCheck/><div><b>Limite de uso</b>{limitations.map(item=><p key={item}>{item}</p>)}</div></div>
-  </section>
+  </section>;
 }
 
-function Overview(){const chain=[['MPFM Subsea',Radio,'98,7%'],['MPFM Topside',TowerControl,'96,3%'],['Separador de Teste',Factory,'97,1%'],['FCS320',Server,'99,0%']];return <section className="content overview"><div className="intro"><div><h2>Visão geral <small>Dados demonstrativos</small></h2></div></div><div className="metrics"><Metric icon={Shield} n="97,6%" l="Conformidade" s="▲ 2,4 p.p. · últimos 30 dias"/><Metric icon={Activity} n="98,3%" l="Disponibilidade" s="▲ 1,1 p.p. · últimos 30 dias"/><Metric icon={CalendarDays} n="95,2%" l="Calibrações no prazo" s="▲ 3,6 p.p. · últimos 30 dias"/><Metric icon={TriangleAlert} n="4" l="Pendências críticas" s="▼ 2 · últimos 30 dias" danger/></div><div className="dashGrid"><article className="chart"><div className="title"><div><h3>Desempenho – Conformidade (%)</h3><p><i/> Conformidade (%) &nbsp;&nbsp; <b>--- Meta (95%)</b></p></div><select><option>Diário</option><option>Semanal</option></select></div><ResponsiveContainer width="100%" height={220}><LineChart data={trend}><CartesianGrid stroke="#e8ebef" vertical={false}/><XAxis dataKey="m" axisLine={false} tickLine={false} fontSize={10}/><YAxis domain={[90,100]} axisLine={false} tickLine={false} fontSize={10}/><Tooltip/><ReferenceLine y={95} stroke="#397fe8" strokeDasharray="6 5"/><Line type="monotone" dataKey="d" stroke="#f52245" strokeWidth={2.5} dot={{fill:'#fff',stroke:'#f52245',strokeWidth:2,r:3}}/></LineChart></ResponsiveContainer><small className="period">Período: 26/abr/2026 – 25/mai/2026 (últimos 30 dias)</small></article><article className="distribution"><h3>Distribuição do status de conformidade</h3><div className="donutRow"><div className="donut"><span><b>64</b>Total de pontos</span></div><ul><li><i className="green"/>Conforme <b>41</b><em>64,1%</em></li><li><i className="yellow"/>Alerta <b>12</b><em>18,8%</em></li><li><i className="red"/>Não conforme <b>7</b><em>10,9%</em></li><li><i className="gray"/>Indefinido <b>4</b><em>6,2%</em></li></ul></div><small>Atualizado há 5 minutos</small></article></div><div className="lowerGrid"><article className="alerts"><div className="title"><h3>Alertas e atividades recentes</h3><a>Ver todas</a></div><table><thead><tr><th>Severidade</th><th>Evento</th><th>Origem</th><th>Data/Hora</th></tr></thead><tbody>{[['Crítico','Desvio de calibração acima do limite','MPFM Topside','11/07/2026 09:18'],['Crítico','Perda de comunicação','FCS320','11/07/2026 08:42'],['Alerta','Certificado próximo do vencimento','MPFM Subsea','11/07/2026 07:31'],['Informação','Evidência registrada','MPFM Topside','11/07/2026 06:55']].map((r,i)=><tr key={r[1]}><td className={'sev s'+i}>△ {r[0]}</td><td><b>{r[1]}</b><small>{i===0?'FT-201 – MPFM Topside':i===1?'FCS320 – UTR-01':i===2?'PT-105 – MPFM Subsea':'Calibração – FT-150'}</small></td><td>{r[2]}</td><td>{r[3]}</td></tr>)}</tbody></table></article><article className="chain"><div className="title"><h3>Cadeia operacional</h3><a>Ver detalhes da cadeia</a></div><div className="chainRow">{chain.map(([n,I,v],i)=><React.Fragment key={n}><div className="asset"><I/><b>{n}</b><small>Status <i/> Online</small><strong>Conformidade<br/>{v}</strong></div>{i<3&&<div className="connector">●</div>}</React.Fragment>)}</div><div className="legend"><i/> Online <i/> Atenção <i/> Offline <i/> Indefinido</div></article></div></section>}
-const Metric=({n,l,s,icon:I,danger})=><article className={'metric '+(danger?'danger':'')}>{I&&<div className="metricIcon"><I/></div>}<div><b>{l}</b><strong>{n}</strong><small>{s}</small></div></article>;const Task=({t,d,c})=><div className="task"><span></span><div><b>{t}</b><small>{d}</small></div><em>{c}</em></div>;
-function Performance(){return <section className="content"><div className="intro"><div><h2>Desempenho periódico do MPFM PE-04</h2><p>Indicadores demonstrativos estruturados para o relatório da RANP 44.</p></div><button><Download size={17}/> Exportar CSV</button></div><div className="metrics"><Metric n="1,4%" l="Desvio massa total" s="Limite de controle ±7%"/><Metric n="2,2%" l="Desvio massa HC" s="Limite de controle ±10%"/><Metric n="31,8" l="Razão óleo/água" s="Critério ≥25"/><Metric n="512 bar" l="Pressão média" s="Acima do ponto de bolha"/></div><div className="panel"><h3>Registro de avaliação</h3><table><thead><tr><th>Campanha</th><th>Janela estável</th><th>Referência</th><th>Desvio total</th><th>Desvio HC</th><th>Resultado</th></tr></thead><tbody><tr><td>PE04-2026-01</td><td>4 h 12 min</td><td>Separador de teste</td><td>1,4%</td><td>2,2%</td><td><mark>Conforme</mark></td></tr></tbody></table></div></section>}
-function Flows(){return <section className="content"><div className="intro"><div><h2>Fluxos operacionais navegáveis</h2><p>Selecione uma etapa para consultar responsável, entrada, saída e evidência.</p></div></div><div className="flow">{['Planejar campanha','Validar condições','Executar comparação','Analisar desvios','Aprovar relatório'].map((x,i)=><React.Fragment key={x}><button><b>{i+1}</b><span>{x}<small>{i===4?'Governança SGM':'Registro rastreável'}</small></span></button>{i<4&&<ChevronRight/>}</React.Fragment>)}</div><div className="panel"><h3>Critérios de decisão</h3><p>A janela deve ser estável, a base de comparação deve estar identificada e todas as transformações de condição precisam permanecer rastreáveis até os dados brutos.</p></div></section>}
-function Trace(){return <section className="content"><div className="intro"><div><h2>Matriz de rastreabilidade</h2><p>Ligação entre requisito, controle, evidência e situação de atendimento.</p></div><button><Download size={17}/> Exportar matriz</button></div><div className="panel"><table><thead><tr><th>Identificador</th><th>Requisito / controle</th><th>Evidência</th><th>Situação</th></tr></thead><tbody>{reqs.map(r=><tr key={r[0]}>{r.map((x,i)=><td key={i}>{i===3?<mark className={x==='Em análise'?'warn':''}>{x}</mark>:x}</td>)}</tr>)}</tbody></table></div></section>}
-function Docs({q}){const docs=[['Relatório de desempenho MPFM PE-04','REL-PE04-2026-01','Relatório'],['Memorial de cálculo e critérios','MEM-SGM-011','Memorial'],['Registro de campanha','REG-PE04-007','Planilha'],['Procedimento de calibração MPFM','PR-SGM-004','Procedimento']].filter(d=>d.join(' ').toLowerCase().includes(q.toLowerCase()));return <section className="content"><div className="intro"><div><h2>Biblioteca técnica integrada</h2><p>Documentos controlados, vinculados às evidências e aos requisitos aplicáveis.</p></div></div><div className="docs">{docs.map(([a,b,c])=><article key={b}><BookOpen/><div><h3>{a}</h3><p>{b} · Revisão 0</p></div><span>{c}</span><ChevronRight/></article>)}</div></section>}
-function RegCalendar(){const[system,setSystem]=useState('Todos');const filtered=events.filter(e=>system==='Todos'||e[1]===system);return <section className="content"><div className="intro"><div><h2>Agenda regulatória 2026 <small>Fonte controlada</small></h2><p>Marcos regulatórios, prazos internos, campanhas e protocolos do SGM Bacalhau.</p></div><button><Download size={17}/> Exportar agenda</button></div><div className="metrics"><Metric icon={CalendarRange} n="15" l="Próximos eventos" s="Janela de 16/jul a 10/set"/><Metric icon={TriangleAlert} n="8" l="Prioridade crítica" s="Foco em PE-02 e PE-04" danger/><Metric icon={Clock3} n="2" l="Protocolos D+180" s="Prazo máximo em 03/ago"/><Metric icon={CircleCheck} n="1" l="Marco atendido" s="Riser-P4 D+30 registrado"/></div><div className="calendarLayout"><div className="calendarMain panel"><div className="calendarToolbar"><div><h3>Linha do tempo</h3><p>Data regulatória preservada; planejamento pode ser antecipado para dia útil.</p></div><label><Filter size={15}/><select value={system} onChange={e=>setSystem(e.target.value)}><option>Todos</option><option>PE-02</option><option>PE-04</option><option>Riser-P4</option><option>PW-104</option></select></label></div><div className="timeline">{filtered.map((e,i)=><article className="eventRow" key={e[0]+e[1]+e[2]}><div className="eventDate">{e[0]}</div><span className={'eventDot '+(e[3]==='Crítica'?'critical':'')}/><div className="eventBody"><div><b>{e[2]}</b><small>{e[1]} · {e[5]}</small></div><div className="eventTags"><em>{e[3]}</em><mark className={/Pendente|preparação/.test(e[4])?'warn':''}>{e[4]}</mark></div></div></article>)}</div></div><aside className="calendarSide"><section><h3>Regras de governança</h3><div className="rule"><b>Fonte de verdade</b><p>Lista corporativa SGM Bacalhau; calendário é camada de visualização.</p></div><div className="rule"><b>Fim de semana</b><p>Atividades internas são antecipadas; a data regulatória não muda.</p></div><div className="rule"><b>Aprovação</b><p>Em revisão → Aprovada → Protocolada → Encerrada.</p></div></section><section className="riskBox"><TriangleAlert/><div><b>Janela crítica</b><p>Fechamento PE-02/PE-04 em 02/ago e protocolo máximo em 03/ago.</p></div></section></aside></div></section>}
+function Cadastros({ data, query }) {
+  const [tab, setTab] = useState("Pontos");
+  const points = useMemo(() => data.cadastros.measurementPoints.filter((row) => Object.values(row).join(" ").toLowerCase().includes(query.toLowerCase())), [data, query]);
+  const wells = useMemo(() => data.cadastros.wells.filter((row) => Object.values(row).join(" ").toLowerCase().includes(query.toLowerCase())), [data, query]);
+  return <section className="content"><div className="intro"><div><h2>Cadastros técnicos <small>Fonte controlada</small></h2><p>Registros lidos das exportações oficiais, sem complementos inferidos.</p></div></div><SourceBanner data={data}/>
+    <div className="metrics"><Metric icon={Radio} n={formatNumber(data.cadastros.measurementPoints.length)} l="Pontos de medição" s="Pontos presentes na exportação carregada"/><Metric icon={Waves} n={formatNumber(data.cadastros.wells.length)} l="Poços" s="Cadastro ANP carregado"/><Metric icon={Database} n={formatNumber(data.sources.length)} l="Arquivos registrados" s="Hash e período preservados"/></div>
+    <div className="tabs"><button className={tab === "Pontos" ? "on" : ""} onClick={() => setTab("Pontos")}>Pontos de medição</button><button className={tab === "Poços" ? "on" : ""} onClick={() => setTab("Poços")}>Poços</button><button className={tab === "Fontes" ? "on" : ""} onClick={() => setTab("Fontes")}>Fontes</button></div>
+    <div className="panel">{tab === "Pontos" ? <table><thead><tr><th>TAG</th><th>Fluido</th><th>Tipo principal</th><th>Medidor</th><th>Localização</th><th>Ativo</th></tr></thead><tbody>{points.map((row) => <tr key={row.tag}><td><b>{row.tag}</b></td><td>{row.fluid || "—"}</td><td>{row.primary_measurement || "—"}</td><td>{row.meter_type || "—"}</td><td>{row.location || "—"}</td><td><mark className={row.active ? "" : "warn"}>{row.active ? "Sim" : "Não"}</mark></td></tr>)}</tbody></table> : tab === "Poços" ? <table><thead><tr><th>Código ANP</th><th>Poço ANP</th><th>Nome operador</th><th>Campo</th><th>Situação</th></tr></thead><tbody>{wells.map((row) => <tr key={row.anp_code}><td><b>{row.anp_code}</b></td><td>{row.anp_name || "—"}</td><td>{row.operator_name || "—"}</td><td>{row.field_name || "—"}</td><td>{row.status || "—"}</td></tr>)}</tbody></table> : <SourcesTable sources={data.sources}/>}</div>
+  </section>;
+}
 
-function Tasks(){const[view,setView]=useState('Lista');return <section className="content"><div className="intro"><div><h2>Centro de tarefas</h2><p>Trabalho necessário para transformar cada marco em evidência aprovada e protocolada.</p></div><button><ClipboardCheck size={17}/> Nova tarefa</button></div><div className="taskSummary"><div><b>7</b><span>tarefas abertas</span></div><div><b>2</b><span>em andamento</span></div><div><b>1</b><span>bloqueada</span></div><div><b>16 dias</b><span>até D+180</span></div></div><div className="tabs"><button className={view==='Lista'?'on':''} onClick={()=>setView('Lista')}>Lista priorizada</button><button className={view==='Kanban'?'on':''} onClick={()=>setView('Kanban')}>Quadro por situação</button></div>{view==='Lista'?<div className="panel"><table><thead><tr><th>Tarefa</th><th>Processo</th><th>Prazo</th><th>Responsável</th><th>Situação</th></tr></thead><tbody>{taskRows.map(r=><tr key={r[0]}>{r.map((v,i)=><td key={i}>{i===4?<mark className={v==='Bloqueada'?'warn':''}>{v}</mark>:v}</td>)}</tr>)}</tbody></table></div>:<div className="kanban">{['A fazer','Em andamento','Bloqueada'].map(col=><section key={col}><header><b>{col}</b><span>{taskRows.filter(r=>r[4]===col).length}</span></header>{taskRows.filter(r=>r[4]===col).map(r=><article key={r[0]}><small>{r[1]}</small><b>{r[0]}</b><p>{r[3]} · {r[2]}</p></article>)}</section>)}</div>}</section>}
+function DataQuality({ data }) {
+  const quality = data.quality;
+  return <section className="content dataQuality"><div className="intro"><div><h2>Qualidade dos dados <small>Calculada</small></h2><p>Ausência e zero são tratados como estados diferentes; nenhum zero é classificado automaticamente como falha.</p></div></div><SourceBanner data={data}/>
+    <div className="metrics"><Metric icon={ShieldCheck} n={formatNumber(quality.complete_24h)} l="Grupos com 24 horas" s="Dia e TAG com cobertura completa"/><Metric icon={TriangleAlert} n={formatNumber(quality.partial_hours)} l="Cobertura parcial" s="Entre 1 e 23 horas" danger/><Metric icon={Activity} n={formatNumber(quality.hourly_without_daily)} l="Hourly sem Daily" s="Mantidos como granularidade independente"/><Metric icon={ChartNoAxesCombined} n={formatNumber(quality.zero_daily_with_hourly)} l="Daily zero com Hourly" s="Requer revisão; sem fallback automático"/></div>
+    <div className="panel"><div className="title"><div><h3>Ocorrências registradas</h3><p>Contagens geradas durante a importação das planilhas reais.</p></div></div>{quality.issues.length ? <table><thead><tr><th>Regra</th><th>Severidade</th><th>Ocorrências</th></tr></thead><tbody>{quality.issues.map((row) => <tr key={`${row.issue_type}-${row.severity}`}><td>{row.issue_type}</td><td><mark className={row.severity === "warn" ? "warn" : ""}>{row.severity}</mark></td><td>{formatNumber(row.count)}</td></tr>)}</tbody></table> : <EmptyRows/>}</div>
+  </section>;
+}
 
-function Processes(){const[active,setActive]=useState(0);const flows=[{name:'Relatório de 180 dias',owner:'Gestão SGM',progress:58,steps:['Confirmar D0 e escopo','Fechar base de dados','Executar análise crítica','Preparar minuta','Aprovar tecnicamente','Protocolar e arquivar']},{name:'Verificação de desempenho MPFM',owner:'Eng. Medição',progress:72,steps:['Planejar campanha','Validar alinhamento','Selecionar janela estável','Comparar com referência','Avaliar desvios e K-Factor','Emitir relatório']},{name:'Comissionamento',owner:'Eng. Medição',progress:86,steps:['Registrar D0','Executar testes','Avaliar em D+30','Tratar pendências','Concluir até D+60','Registrar evidências']},{name:'Falha de medição',owner:'Gestão SGM',progress:40,steps:['Detectar e classificar','Abrir notificação','Avaliar impacto','Corrigir e acompanhar','Emitir comunicação final','Encerrar trilha']}];const f=flows[active];return <section className="content"><div className="intro"><div><h2>Mapa de processos e controles</h2><p>Entradas, decisões, responsáveis, evidências e pontos de bloqueio.</p></div></div><div className="processLayout"><div className="processList">{flows.map((x,i)=><button className={active===i?'selected':''} onClick={()=>setActive(i)} key={x.name}><span><Workflow/></span><div><b>{x.name}</b><small>{x.owner}</small></div><strong>{x.progress}%</strong></button>)}</div><div className="processCanvas panel"><div className="processHead"><div><h3>{f.name}</h3><p>Responsável primário: {f.owner}</p></div><div className="progressRing" style={{'--p':f.progress}}><b>{f.progress}%</b></div></div><div className="stepFlow">{f.steps.map((s,i)=><article key={s}><span>{i+1}</span><div><b>{s}</b><small>{i<2?'Entrada e preparação':i<4?'Execução e análise':'Governança e evidência'}</small></div>{i<f.steps.length-1&&<ChevronRight/>}</article>)}</div><div className="controlGrid"><div><b>Entrada mínima</b><p>Identificação do ativo, período, fonte dos dados e marco regulatório.</p></div><div><b>Critério de saída</b><p>Evidência aprovada, rastreável e vinculada ao requisito aplicável.</p></div><div><b>Bloqueios</b><p>Alinhamento não confirmado, dados incompletos ou aprovação pendente.</p></div></div></div></div></section>}
+function Performance({ data }) {
+  const hasAlignment = false;
+  return <section className="content"><div className="intro"><div><h2>Desempenho MPFM <small>{hasAlignment ? "Calculado" : "Não avaliável"}</small></h2><p>Resultados de conformidade só serão emitidos após cadastro temporal do alinhamento MPFM–separador e validação da janela.</p></div></div><SourceBanner data={data}/>
+    <div className="qualityNotice"><TriangleAlert/><div><b>Nenhum resultado oficial calculado</b><p>A base contém medições reais de MPFM e separador, mas não contém alinhamento temporal suficiente. O Portal não cria campanhas, desvios ou conformidades por inferência.</p></div></div>
+    <div className="panel"><div className="title"><div><h3>Medições disponíveis para preparação</h3><p>Último dia carregado; estes valores ainda não constituem avaliação de desempenho.</p></div></div><MeasurementTable rows={data.measurements.latestByTag}/></div>
+  </section>;
+}
+
+function Trace({ data }) {
+  return <section className="content"><div className="intro"><div><h2>Rastreabilidade <small>Arquivo → registro</small></h2><p>Cada conjunto apresenta arquivo, tipo, período, quantidade e momento da carga.</p></div></div><SourceBanner data={data}/><div className="panel"><SourcesTable sources={data.sources}/></div></section>;
+}
+
+function MeasurementTable({ rows }) {
+  return rows.length ? <table><thead><tr><th>TAG</th><th>Banco</th><th>Entidade</th><th>Data</th><th>Horas</th><th>Total Daily (t)</th></tr></thead><tbody>{rows.map((row) => <tr key={`${row.production_date}-${row.tag}`}><td><b>{row.tag}</b></td><td>{row.bank || "—"}</td><td>{row.entity || "—"}</td><td>{formatDate(row.production_date)}</td><td>{formatNumber(row.hours)}</td><td>{Number(row.daily_total_t || 0).toLocaleString("pt-BR", { maximumFractionDigits: 3 })}</td></tr>)}</tbody></table> : <EmptyRows/>;
+}
+
+function SourcesTable({ sources }) {
+  return sources.length ? <table><thead><tr><th>Arquivo</th><th>Tipo</th><th>Aba</th><th>Período</th><th>Linhas</th><th>Carga</th></tr></thead><tbody>{sources.map((row) => <tr key={row.id}><td><b>{row.file_name}</b></td><td>{row.source_type}</td><td>{row.source_sheet || "—"}</td><td>{row.period_start ? `${formatDate(row.period_start)} – ${formatDate(row.period_end)}` : "Cadastro"}</td><td>{formatNumber(row.row_count)}</td><td>{String(row.imported_at || "").replace("T", " ").slice(0, 19)}</td></tr>)}</tbody></table> : <EmptyRows/>;
+}
+
+function DataState({ title, detail, warning = false }) {
+  const Icon = warning ? TriangleAlert : Database;
+  return <section className="content"><div className="qualityNotice"><Icon/><div><b>{title}</b><p>{detail}</p><p>Nenhum número demonstrativo será exibido no lugar dos dados ausentes.</p></div></div></section>;
+}
+
+const EmptyRows = () => <div className="qualityNotice"><Database/><div><b>Sem registros reais</b><p>Nenhum dado validado foi encontrado para esta seção.</p></div></div>;
+const Metric = ({ n, l, s, icon: Icon, danger }) => <article className={`metric ${danger ? "danger" : ""}`}>{Icon && <div className="metricIcon"><Icon/></div>}<div><b>{l}</b><strong>{n}</strong><small>{s}</small></div></article>;
 
 export default App;

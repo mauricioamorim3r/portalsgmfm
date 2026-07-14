@@ -1,33 +1,17 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("renders the Portal SGM product shell", async () => {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
+const page = await readFile(new URL("../app/page.jsx", import.meta.url), "utf8");
 
-  const response = await worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
+test("the Portal shell reads the operational API", () => {
+  assert.match(page, /fetch\("\/api\/portal-data"/);
+  assert.match(page, /Somente fontes reais/);
+  assert.match(page, /Nenhum número demonstrativo será exibido/);
+});
 
-  assert.equal(response.status, 200);
-  assert.match(
-    response.headers.get("content-type") ?? "",
-    /^text\/html\b/i,
-  );
-  const html = await response.text();
-  assert.match(html, /<title>Portal SGM — Sistema de Gestão de Medição<\/title>/i);
-  assert.match(html, />Qualidade dos dados<\/span>/i);
-  assert.doesNotMatch(html, /name=["']codex-preview["']/i);
+test("the Portal no longer embeds the former demonstration values", () => {
+  for (const forbidden of ["97,6%", "98,3%", "PE04-2026-01", "Dados demonstrativos"]) {
+    assert.doesNotMatch(page, new RegExp(forbidden.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"));
+  }
 });
