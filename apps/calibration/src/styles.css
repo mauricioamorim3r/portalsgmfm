@@ -6,3 +6,4 @@
 .envelope-pair{display:flex;gap:6px;align-items:center}.envelope-pair input{border:1px solid #79bb87;border-radius:5px;padding:9px 10px;width:80px;font-size:12px;background:#f8fff9}.envelope-pair em{font-size:10px;color:#557263}
 .table-wrap{overflow-x:auto;padding:0 16px 16px}table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}th{text-align:left;padding:8px 10px;color:#75849a;font-weight:700;border-bottom:2px solid var(--line);position:sticky;top:0;background:#fff}td{padding:7px 10px;border-bottom:1px solid #edf0f5}tbody tr:hover{background:#f8fafc}
 .form-error{color:var(--red);font-size:11px;margin:8px 0 0}
+button.icon{border:1px solid #bcc9da;background:#fff;color:var(--navy);border-radius:6px;padding:8px;display:flex;align-items:center;justify-content:center}
