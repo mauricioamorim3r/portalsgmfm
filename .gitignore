@@ -15,3 +15,8 @@ data/private/
 
 # Detailed local source inventory can expose confidential document names.
 docs/inventory/*.csv
+
+# Raw source packages/spreadsheets dropped at the project root for analysis
+# (e.g. calibration app exports). Only derived numeric rows get committed,
+# via the scripts/import-*.py pipelines — never the originals.
+*.zip
