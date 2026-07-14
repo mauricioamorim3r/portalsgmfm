@@ -32,3 +32,17 @@ npm run build
 ## Limite da primeira versão
 
 O Excel exportado contém as informações preenchidas e calculadas em um arquivo novo. A preservação integral dos estilos, gráficos e fórmulas do template original deve ser implementada no próximo ciclo por preenchimento direto do pacote OOXML do modelo.
+
+## Publicar no Portal SGM
+
+Este app não faz parte do pipeline de build do Portal SGM. Depois de mudar
+algo em `src/`, gere o build e copie a saída pra dentro do repo do Portal:
+
+```bash
+npm run build
+rm -rf ../../public/calibracao
+mkdir -p ../../public/calibracao
+cp -r dist/. ../../public/calibracao/
+```
+
+Depois, commite `public/calibracao/` junto com sua mudança em `src/`.
