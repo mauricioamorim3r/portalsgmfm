@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { loadCalibrationCampaign } from "../../../db/calibration";
-import { saveCalibrationCampaign, type CampaignInput } from "../../../db/calibration-write";
+import { saveCalibrationCampaign, createCalibrationCampaign, type CampaignInput } from "../../../db/calibration-write";
 
 // This endpoint is meant to be called cross-origin by the standalone MPFM
 // calibration app (a separate local dev server, not part of this repo), so
@@ -15,7 +15,7 @@ export async function OPTIONS(request: Request) {
     status: 204,
     headers: {
       ...corsHeaders(request),
-      "Access-Control-Allow-Methods": "GET, PUT",
+      "Access-Control-Allow-Methods": "GET, PUT, POST",
       "Access-Control-Allow-Headers": "Content-Type",
     },
   });
@@ -165,6 +165,35 @@ export async function PUT(request: Request) {
     const message = /no such table|D1_ERROR/i.test(detail)
       ? "A base real ainda não foi inicializada neste ambiente. A migração será aplicada na publicação."
       : "Falha ao gravar a base real.";
+    return Response.json({ status: "error", error: message }, { status: 500, headers });
+  }
+}
+
+export async function POST(request: Request) {
+  const headers = corsHeaders(request);
+  try {
+    if (!env.DB) {
+      return Response.json({ status: "unavailable", error: "Base D1 não vinculada." }, { status: 503, headers });
+    }
+
+    const body = await request.json().catch(() => null);
+    const input = parseCampaignInput(body);
+    if (!input) {
+      return Response.json({ status: "error", error: "Corpo da requisição inválido." }, { status: 400, headers });
+    }
+
+    const result = await createCalibrationCampaign(env.DB, input);
+    if (!result.ok) {
+      return Response.json({ status: "error", error: `Já existe uma campanha com o Campaign ID "${input.id}".` }, { status: 409, headers });
+    }
+
+    const campaign = await loadCalibrationCampaign(env.DB, input.id);
+    return Response.json({ status: "ok", campaign }, { status: 201, headers });
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "";
+    const message = /no such table|D1_ERROR/i.test(detail)
+      ? "A base real ainda não foi inicializada neste ambiente. A migração será aplicada na publicação."
+      : "Falha ao criar a campanha na base real.";
     return Response.json({ status: "error", error: message }, { status: 500, headers });
   }
 }
