@@ -85,15 +85,17 @@ can be fed to `calculate()` with no reshaping. As of Phase 2 (2026-07-14),
 `PUT /api/calibration?campaignId=` (`db/calibration-write.ts` →
 `saveCalibrationCampaign`) persists edits back to the same tables — scoped to
 exactly the fields the engine's `Campaign` type carries (scalar fields,
-envelope, PVT, K-factors, uncertainty, evidence/approvals). It only updates
-an existing campaign (404 if not found) — creating a campaign is still
-exclusively `scripts/import-mpfm-calibration.py`'s job. `rows` (MPFM/
+envelope, PVT, K-factors, uncertainty, evidence/approvals). `rows` (MPFM/
 separator readings) and everything under `campaign.raw` stay read-only/
-import-only. The Metrolog app's "Salvar" button calls this endpoint (same
-origin as of Phase 1) in addition to its existing `localStorage` save. Fields
-the v1 engine doesn't consume yet (separator, lab, PVT/K/uncertainty detail)
-still come back under `campaign.raw` for traceability and future engine
-versions.
+import-only — no in-app path writes those yet. The Metrolog app's "Salvar"
+button calls this endpoint (same origin as of Phase 1) in addition to its
+existing `localStorage` save. As of Phase 4 (2026-07-14), `POST
+/api/calibration` (`createCalibrationCampaign`) creates a brand-new campaign
+from the app itself, via a "Solicitar calibração" modal — `scripts/
+import-mpfm-calibration.py` remains available for bulk/offline creation but
+is no longer the only path. Fields the v1 engine doesn't consume yet
+(separator, lab, PVT/K/uncertainty detail) still come back under
+`campaign.raw` for traceability and future engine versions.
 Raw source Excel samples still stay out of the repo (same "no raw source
 docs" policy as `docs/source-selection.md`) — only derived numeric rows are
 committed, via `scripts/import-mpfm-calibration.py`.
