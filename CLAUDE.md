@@ -44,12 +44,15 @@ This is the core constraint of the whole app — **never break it**:
 ```
 worker/index.ts                 Cloudflare Worker entry (delegates to vinext)
 app/page.jsx                    Thin re-export of PortalApp (Next app router page)
-app/api/portal-data/route.ts    Only API route — thin wrapper around db/portal-data.ts
-db/portal-data.ts               Query logic (SQL + shaping), takes a D1-shaped db — testable
+app/api/portal-data/route.ts    Production dashboard API — thin wrapper around db/portal-data.ts
+app/api/calibration/route.ts    MPFM calibration campaign API — thin wrapper around db/calibration.ts
+db/portal-data.ts               Production dashboard query logic — D1-shaped db, testable
+db/calibration.ts               Assembles a calibration Campaign (see below) — D1-shaped db, testable
 db/schema.ts                    Drizzle schema (source of truth for tables)
-drizzle/*.sql                   Migrations (0001 also carries seed data — large)
+drizzle/*.sql                   Migrations (0001 and 0003 also carry seed data — large)
 src/components/portal/          Dashboard UI, one view per file (PortalApp is the shell)
-scripts/import-real-data.py     Source spreadsheet → D1 import pipeline
+scripts/import-real-data.py     Source spreadsheet → D1 import pipeline (production tables)
+scripts/import-mpfm-calibration.py  Calibration campaign Excel → D1 import (calibration_* tables)
 scripts/analyze-oil-linear.py   Data quality profiling for source spreadsheet
 scripts/cloudflare-node-stub.mjs  Node loader stub so cloudflare:* imports resolve
                                    under plain Node during validate-artifact.sh only
@@ -57,6 +60,23 @@ docs/                           Data provenance/decision records (source-selecti
                                  data-quality) — update when data sourcing changes
 tests/                          node:test — build artifact, query logic, migration checks
 ```
+
+### Calibration domain (`calibration_*` tables)
+
+Separate from the continuous-production tables (`mpfm_measurements`, etc.): a
+calibration campaign is a bounded, per-TAG K-factor commissioning/verification
+event (AS_FOUND/POST_K windows), not a stream of ongoing readings. Added
+2026-07-14 to feed the standalone MPFM calibration engine from
+`Portal_MPFM_Riser_P4_v1.zip` (16-gate metrology workflow, `calculate()` in
+its `src/main.tsx`) — that app is **not** part of this repo and its front-end
+was intentionally not touched. `db/calibration.ts` → `loadCalibrationCampaign`
+returns a payload shaped to match that engine's `Campaign`/`Row` types field
+for field, so it can be fed to `calculate()` with no reshaping. Fields the v1
+engine doesn't consume yet (separator, lab, PVT/K/uncertainty detail) still
+come back under `campaign.raw` for traceability and future engine versions.
+The source Excel/zip stay out of the repo (same "no raw source docs" policy
+as `docs/source-selection.md`) — only derived numeric rows are committed, via
+`scripts/import-mpfm-calibration.py`.
 
 ## Common Tasks
 
