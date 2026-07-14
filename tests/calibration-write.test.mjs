@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
 import { loadCalibrationCampaign } from "../db/calibration.ts";
-import { saveCalibrationCampaign } from "../db/calibration-write.ts";
+import { saveCalibrationCampaign, createCalibrationCampaign } from "../db/calibration-write.ts";
 
 const migrations = [
   "../drizzle/0000_big_queen_noir.sql",
@@ -26,8 +26,8 @@ function toD1Shim(db) {
               return stmt.get(...values) ?? null;
             },
             async run() {
-              stmt.run(...values);
-              return { success: true };
+              const info = stmt.run(...values);
+              return { success: true, meta: { last_row_id: Number(info.lastInsertRowid) } };
             },
           };
         },
@@ -151,4 +151,42 @@ test("supports renaming the campaign_id", async () => {
   assert.equal(await loadCalibrationCampaign(db, "RVD-MPFM-COM-05-26"), null);
   const renamed = await loadCalibrationCampaign(db, "RVD-MPFM-COM-05-26-REV1");
   assert.equal(renamed.tag, "13FT0317");
+});
+
+function blankInput(id) {
+  return {
+    id, revision: "Rev. 0", nature: "COMISSIONAMENTO", asset: "", well: "", tag: "99XX9999",
+    serial: "", reference: "", start: null, end: null, postStart: null, postEnd: null,
+    pb: null, hcLimit: null, totalLimit: null, pvtLimit: null, kMin: null, kMax: null,
+    minRecords: null, pvtMonths: null, timezone: "", responsible: "", approver: "",
+    envelope: { p: [null, null], t: [null, null], dp: [null, null], gvf: [null, null], wlr: [null, null] },
+    pvt: { asOil: null, asGas: null, asWater: null, postOil: null, postGas: null, postWater: null, file: "", hash: "", software: "", version: "", approver: "" },
+    uncertainty: { asMpfm: null, asRef: null, postMpfm: null, postRef: null },
+    k: { oilApproved: null, gasApproved: null, waterApproved: null, oilApplied: null, gasApplied: null, waterApplied: null, date: "", responsible: "", evidence: "" },
+    evidence: false,
+    approvals: false,
+  };
+}
+
+test("createCalibrationCampaign creates a new campaign with empty related rows ready for upsert", async () => {
+  const db = toD1Shim(await seededDb());
+  const result = await createCalibrationCampaign(db, blankInput("NOVA-CAMPANHA-001"));
+  assert.equal(result.ok, true);
+  assert.equal(typeof result.id, "number");
+
+  const campaign = await loadCalibrationCampaign(db, "NOVA-CAMPANHA-001");
+  assert.equal(campaign.tag, "99XX9999");
+  assert.equal(campaign.nature, "COMISSIONAMENTO");
+  assert.deepEqual(campaign.envelope.p, [null, null]);
+  // Related tables have a row already (not just column defaults from a missing row) —
+  // confirms the creation batch ran, not just the campaign insert.
+  assert.equal(campaign.raw.pvtRecords.length, 2);
+  assert.equal(campaign.raw.kApplications.length, 3);
+  assert.equal(campaign.raw.uncertaintyRows.length, 2);
+});
+
+test("createCalibrationCampaign returns conflict for a campaign_id that already exists", async () => {
+  const db = toD1Shim(await seededDb());
+  const result = await createCalibrationCampaign(db, blankInput("RVD-MPFM-COM-05-26"));
+  assert.deepEqual(result, { ok: false, reason: "conflict" });
 });
