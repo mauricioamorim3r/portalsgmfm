@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, PanelLeftClose, Search } from "lucide-react";
+import { Activity, Gauge, PanelLeftClose, Search } from "lucide-react";
 import "./data-quality.css";
 import { nav } from "./nav";
 import { DataState } from "./Shared";
@@ -45,6 +45,7 @@ function PortalApp() {
       <div className="brand"><span>e</span><div><b>SGM</b><small>Measurement management</small></div></div>
       <nav>{nav.map(([name, Icon]) => <button key={name} className={page === name ? "active" : ""} onClick={() => setPage(name)}><Icon size={19}/><span>{name}</span></button>)}</nav>
       <div className="asideFoot"><Activity size={18}/><div><b>Ambiente restrito</b><small>Somente fontes reais</small></div></div>
+      <a className="calibLink" href="/calibracao/"><Gauge size={18}/><div><b>Calibração MPFM</b><small>Abrir motor de cálculo</small></div></a>
     </aside>
     <main>
       <header><div><h1>{page}</h1><p>Portal integrado do Sistema de Gestão de Medição</p></div><div className="search"><Search size={18}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar TAG, poço ou arquivo"/></div><button className="icon" aria-label="Recolher menu"><PanelLeftClose size={20}/></button></header>
