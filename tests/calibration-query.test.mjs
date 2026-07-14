@@ -79,4 +79,18 @@ test("loadCalibrationCampaign assembles the real Riser P4 campaign for calculate
   assert.equal(campaign.raw.pvtRecords.length, 2);
   assert.equal(campaign.raw.kApplications.length, 4);
   assert.equal(campaign.raw.uncertaintyRows.length, 2);
+
+  // Regression: the Metrolog frontend's calculate() dereferences
+  // campaign.integrity.* unconditionally — an absent `integrity` field
+  // crashes the whole app (found via manual QA, 2026-07-14). No
+  // calibration_* column backs these flags, so they must default to
+  // false rather than being omitted or fabricated as true.
+  assert.deepEqual(campaign.integrity, {
+    raw: false,
+    dp: false,
+    units: false,
+    timezone: false,
+    gaps: false,
+    exclusions: false,
+  });
 });

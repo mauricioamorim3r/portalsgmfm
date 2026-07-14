@@ -123,6 +123,12 @@ export async function loadCalibrationCampaign(db: D1Queryable, campaignId: strin
       responsible: kOil.responsible ?? "",
       evidence: kOil.evidence_id ?? "",
     },
+    // No calibration_* column backs any of these six flags yet — there is no
+    // automated check for raw-data integrity, dP history, unit consistency,
+    // timezone completeness, gap detection, or exclusion handling. Default to
+    // false ("not verified") rather than fabricate a pass; the frontend's
+    // gate G06 correctly shows pending until real verification logic exists.
+    integrity: { raw: false, dp: false, units: false, timezone: false, gaps: false, exclusions: false },
     evidence: Boolean(campaign.evidence),
     approvals: Boolean(campaign.approvals),
     rows: mpfmRows.map((row) => ({
