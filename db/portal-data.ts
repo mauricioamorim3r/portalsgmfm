@@ -17,6 +17,10 @@ export interface D1Queryable {
   prepare(sql: string): D1Statement;
 }
 
+export interface D1Batchable extends D1Queryable {
+  batch<T = unknown>(statements: unknown[]): Promise<T[]>;
+}
+
 async function all(db: D1Queryable, sql: string, ...bindings: unknown[]): Promise<D1Row[]> {
   const result = await db.prepare(sql).bind(...bindings).all<D1Row>();
   return result.results ?? [];
