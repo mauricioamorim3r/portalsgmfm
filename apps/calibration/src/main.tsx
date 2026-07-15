@@ -49,13 +49,13 @@ async function parseMpfmWindow(file:File,tag:string,start:string,end:string):Pro
  const endTime=end?new Date(end).getTime():Infinity;
  const out:MpfmExtractRow[]=[];
  for(const r of XLSX.utils.sheet_to_json<any[]>(ws,{header:1,raw:true})){
-  if(r[3]!=='Hourly'||r[13]!==tag) continue;
-  const date=r[1],hour=r[2];
+  if(r[2]!=='Hourly'||r[12]!==tag) continue;
+  const date=r[0],hour=r[1];
   if(!date||!hour) continue;
   const timestamp=`${date}T${hour}:00`;
   const t=new Date(timestamp).getTime();
   if(Number.isNaN(t)||t<startTime||t>endTime) continue;
-  out.push({timestamp,use:true,duration:1,quality:'',p:toNum(r[45]),t:toNum(r[46]),dp:null,gvf:null,wlr:null,oil:toNum(r[16]),gas:toNum(r[15]),water:toNum(r[18]),oilCorr:toNum(r[21]),gasCorr:toNum(r[20]),waterCorr:toNum(r[23])});
+  out.push({timestamp,use:true,duration:1,quality:'',p:toNum(r[44]),t:toNum(r[45]),dp:null,gvf:null,wlr:null,oil:toNum(r[15]),gas:toNum(r[14]),water:toNum(r[17]),oilCorr:toNum(r[20]),gasCorr:toNum(r[19]),waterCorr:toNum(r[22])});
  }
  return out;
 }
