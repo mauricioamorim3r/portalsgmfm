@@ -1,14 +1,7 @@
 import { env } from "cloudflare:workers";
 import { loadCalibrationCampaign } from "../../../db/calibration";
 import { saveCalibrationCampaign, createCalibrationCampaign, type CampaignInput } from "../../../db/calibration-write";
-
-// This endpoint is meant to be called cross-origin by the standalone MPFM
-// calibration app (a separate local dev server, not part of this repo), so
-// only localhost origins get an Access-Control-Allow-Origin — never "*".
-function corsHeaders(request: Request): HeadersInit {
-  const origin = request.headers.get("origin") ?? "";
-  return /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin) ? { "Access-Control-Allow-Origin": origin } : {};
-}
+import { corsHeaders } from "./cors";
 
 export async function OPTIONS(request: Request) {
   return new Response(null, {
