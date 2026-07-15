@@ -7,6 +7,8 @@ import './styles.css';
 type Row={condition:'AS_FOUND'|'POST_K';timestamp:string;use:boolean;duration:number;p:number;t:number;dp:number;gvf:number;wlr:number;oil:number;gas:number;water:number;oilCorr?:number;gasCorr?:number;waterCorr?:number};
 type SeparatorRow={condition:string,timestamp:string,use_flag:number,duration_h:number|null,quality:string,pressure_barg:number|null,temperature_c:number|null,oil_gv_line_m3:number|null,oil_rho_coriolis_kgm3:number|null,oil_mass_direct_t:number|null,gas_mass_t:number|null,water_mass_t:number|null,gas_std_ksm3:number|null,water_vol_m3:number|null,source_ref:string};
 type LabResult={sample_id:string,use_flag:number,sampled_at:string,sample_type:string,bsw_pct:number|null,rho_oil_std_kgm3:number|null,rho_gas_std_kgsm3:number|null,rho_water_std_kgm3:number|null,fe:number|null,rs:number|null,method:string,report_id:string,status:string};
+type MpfmExtractRow={timestamp:string,use:boolean,duration:number|null,quality:string,p:number|null,t:number|null,dp:number|null,gvf:number|null,wlr:number|null,oil:number|null,gas:number|null,water:number|null,oilCorr:number|null,gasCorr:number|null,waterCorr:number|null};
+type SeparatorExtractRow={timestamp:string,use:boolean,durationH:number|null,quality:string,pressureBarg:number|null,temperatureC:number|null,oilGvLineM3:number|null,oilRhoCoriolisKgm3:number|null,oilMassDirectT:number|null,gasMassT:number|null,waterMassT:number|null,gasStdKsm3:number|null,waterVolM3:number|null,sourceRef:string};
 type Campaign={id:string,revision:string,nature:string,asset:string,well:string,tag:string,serial:string,type:string,reference:string,start:string,end:string,postStart:string,postEnd:string,pb:number,hcLimit:number,totalLimit:number,pvtLimit:number,kMin:number,kMax:number,minRecords:number,pvtMonths:number,timezone:string,responsible:string,approver:string,envelope:{p:[number|null,number|null],t:[number|null,number|null],dp:[number|null,number|null],gvf:[number|null,number|null],wlr:[number|null,number|null]},pvt:{asOil:number,asGas:number,asWater:number,postOil:number,postGas:number,postWater:number,file:string,hash:string,software:string,version:string,approver:string},uncertainty:{asMpfm:number,asRef:number,postMpfm:number,postRef:number},k:{oilApproved:number,gasApproved:number,waterApproved:number,oilApplied:number,gasApplied:number,waterApplied:number,date:string,responsible:string,evidence:string},integrity:{raw:boolean,dp:boolean,units:boolean,timezone:boolean,gaps:boolean,exclusions:boolean},evidence:boolean,approvals:boolean,rows:Row[],raw?:{separatorRows:SeparatorRow[],labResults:LabResult[]}};
 
 const sampleRows:Row[] = Array.from({length:48},(_,i)=>{const post=i>=24; const base=post?i-24:i; return {condition:post?'POST_K':'AS_FOUND',timestamp:new Date(Date.UTC(2026,5,29+(post?4:0),12+base)).toISOString(),use:true,duration:1,p:116+Math.sin(base/3)*2,t:68+Math.cos(base/5)*1.8,dp:43+Math.sin(base/2)*4,gvf:65+Math.sin(base/4)*5,wlr:0,oil:post?7900/24:8090.398/24,gas:post?1830/24:1854.678/24,water:0,oilCorr:post?8290/24:undefined,gasCorr:post?1890.074/24:undefined,waterCorr:0}});
@@ -32,11 +34,60 @@ export function calculate(c:Campaign){
 const fmt=(n:number,d=2)=>Number.isFinite(n)?n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 const pct=(n:number)=>Number.isFinite(n)?`${n<0?'−':''}${fmt(Math.abs(n)*100,2)}%`:'—';
 const numOrDash=(n:number|null,d=2)=>n==null?'—':fmt(n,d);
+const toNum=(v:unknown):number|null=>{const n=Number(v);return Number.isFinite(n)?n:null};
 
 const nav=[['Visão geral',Home],['Campanha',ClipboardCheck],['Importação',Import],['MPFM',Gauge],['Separador',Droplets],['Laboratório/PVT',Beaker],['Fatores K',SlidersHorizontal],['Pós-K',Activity],['Evidências',FileCheck2],['Relatórios',BarChart3]] as const;
 function SparkChart({rows,kind='stability'}:{rows:Row[],kind?:string}){const data=rows.filter(r=>r.use); const W=520,H=188,pad=26; if(!data.length)return <div className="empty">Sem dados para o gráfico.</div>; const vals=kind==='gvf'?data.map(r=>r.gvf):data.map(r=>r.p); const min=Math.min(...vals)*.98,max=Math.max(...vals)*1.02; const points=vals.map((v,i)=>`${pad+i*(W-pad*2)/Math.max(vals.length-1,1)},${H-pad-(v-min)*(H-pad*2)/(max-min||1)}`).join(' ');return <svg viewBox={`0 0 ${W} ${H}`} className="chart"><g className="grid">{[0,1,2,3].map(i=><line key={i} x1={pad} x2={W-pad} y1={pad+i*42} y2={pad+i*42}/>)}</g><polyline points={points} fill="none" stroke="#0b2c5b" strokeWidth="3"/><polyline points={points} fill="none" stroke="#ff1243" strokeWidth="1" strokeDasharray="5 5" transform="translate(0 4)"/></svg>}
 function CompareChart({r}:{r:ReturnType<typeof calculate>}){const items=[['Óleo',r.asOil,r.refOil],['Gás',r.asGas,r.refGas],['HC',r.asHC,r.refHC],['Total',r.asTotal,r.refTotal]] as [string,number,number][]; const max=Math.max(...items.flatMap(x=>[x[1],x[2]]));return <div className="bar-chart">{items.map(([n,a,b])=><div className="bar-row" key={n}><span>{n}</span><div><i style={{width:`${a/max*100}%`}}/><em style={{width:`${b/max*100}%`}}/></div><strong>{fmt((a-b)/b*100,1)}%</strong></div>)}<footer><span><b className="dot navy"/>MPFM</span><span><b className="dot magenta"/>Referência</span></footer></div>}
 
+async function parseMpfmWindow(file:File,tag:string,start:string,end:string):Promise<MpfmExtractRow[]>{
+ const ab=await file.arrayBuffer();
+ const wb=XLSX.read(ab,{cellDates:true});
+ const ws=wb.Sheets['BASE_UNICA_MES'];
+ if(!ws) return [];
+ const startTime=start?new Date(start).getTime():-Infinity;
+ const endTime=end?new Date(end).getTime():Infinity;
+ const out:MpfmExtractRow[]=[];
+ for(const r of XLSX.utils.sheet_to_json<any[]>(ws,{header:1,raw:true})){
+  if(r[3]!=='Hourly'||r[13]!==tag) continue;
+  const date=r[1],hour=r[2];
+  if(!date||!hour) continue;
+  const timestamp=`${date}T${hour}:00`;
+  const t=new Date(timestamp).getTime();
+  if(Number.isNaN(t)||t<startTime||t>endTime) continue;
+  out.push({timestamp,use:true,duration:1,quality:'',p:toNum(r[45]),t:toNum(r[46]),dp:null,gvf:null,wlr:null,oil:toNum(r[16]),gas:toNum(r[15]),water:toNum(r[18]),oilCorr:toNum(r[21]),gasCorr:toNum(r[20]),waterCorr:toNum(r[23])});
+ }
+ return out;
+}
+async function parseSeparatorWindow(file:File,start:string,end:string):Promise<SeparatorExtractRow[]>{
+ const ab=await file.arrayBuffer();
+ const wb=XLSX.read(ab,{cellDates:true});
+ const startTime=start?new Date(start).getTime():-Infinity;
+ const endTime=end?new Date(end).getTime():Infinity;
+ const readings:Record<string,{p:number|null,t:number|null,oilGv:number|null,oilRho:number|null,oilMass:number|null,gasMass:number|null,gasStd:number|null,waterMass:number|null,waterVol:number|null}>={};
+ const ensure=(timestamp:string)=>readings[timestamp]??(readings[timestamp]={p:null,t:null,oilGv:null,oilRho:null,oilMass:null,gasMass:null,gasStd:null,waterMass:null,waterVol:null});
+ const eachRow=(sheetName:string,fn:(r:any[],timestamp:string)=>void)=>{
+  const ws=wb.Sheets[sheetName];
+  if(!ws) return;
+  let currentDay='';
+  for(const r of XLSX.utils.sheet_to_json<any[]>(ws,{header:1,raw:true})){
+   const marker=String(r[2]??'');
+   const dayMatch=/Data:\s*(\d{4}-\d{2}-\d{2})/.exec(marker);
+   if(dayMatch){currentDay=dayMatch[1];continue}
+   if(!currentDay||marker==='DAY') continue;
+   const hourNum=Number(marker);
+   if(!Number.isInteger(hourNum)||hourNum<1||hourNum>24) continue;
+   const timestamp=`${currentDay}T${String(hourNum-1).padStart(2,'0')}:00`;
+   const t=new Date(timestamp).getTime();
+   if(Number.isNaN(t)||t<startTime||t>endTime) continue;
+   fn(r,timestamp);
+  }
+ };
+ eachRow('separador oleo',(r,timestamp)=>{const e=ensure(timestamp);e.p=toNum(r[4]);e.t=toNum(r[5]);e.oilGv=toNum(r[9]);e.oilRho=toNum(r[17]);e.oilMass=toNum(r[11])});
+ eachRow('separador gas',(r,timestamp)=>{const e=ensure(timestamp);e.gasMass=toNum(r[9]);const std=toNum(r[8]);e.gasStd=std!=null?std/1000:null});
+ eachRow('separador agua',(r,timestamp)=>{const e=ensure(timestamp);e.waterMass=toNum(r[10]);e.waterVol=toNum(r[8])});
+ return Object.entries(readings).map(([timestamp,v])=>({timestamp,use:true,durationH:1,quality:'',pressureBarg:v.p,temperatureC:v.t,oilGvLineM3:v.oilGv,oilRhoCoriolisKgm3:v.oilRho,oilMassDirectT:v.oilMass,gasMassT:v.gasMass,waterMassT:v.waterMass,gasStdKsm3:v.gasStd,waterVolM3:v.waterVol,sourceRef:file.name}));
+}
 function App(){
  const [c,setC]=useState<Campaign>(()=>{try{return JSON.parse(localStorage.getItem('mpfm-campaign')||'null')||initial}catch{return initial}}),[active,setActive]=useState('Visão geral'),[drawer,setDrawer]=useState(false),[toast,setToast]=useState(''),[mobile,setMobile]=useState(false),[novaCampanha,setNovaCampanha]=useState(false); const fileRef=useRef<HTMLInputElement>(null); const r=useMemo(()=>calculate(c),[c]);
  useEffect(()=>{let alive=true;fetch(`/api/calibration?campaignId=${encodeURIComponent(c.id)}`).then(res=>res.json()).then(data=>{if(alive&&data.status==='ok'&&data.campaign)setC(data.campaign)}).catch(()=>{});return ()=>{alive=false}},[]);
