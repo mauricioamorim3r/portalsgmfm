@@ -583,6 +583,16 @@ type SeparatorExtractRow={timestamp:string,use:boolean,durationH:number|null,qua
 
 - [ ] **Step 3: Add the two parsing functions, right before `function App(){`**
 
+> **Correction (2026-07-15, commit `9307f55`):** the `parseMpfmWindow` column
+> indices below (`r[3]`/`r[13]`/`r[45]`/`r[46]`/`r[16]`/`r[15]`/`r[18]`/
+> `r[21]`/`r[20]`/`r[23]`) were verified wrong against the real
+> `MPFM_JUN_2026.xlsx` during Task 7's live E2E pass — they silently
+> extracted zero rows. The shipped code uses the corrected indices
+> (`r[2]`/`r[12]`/`r[44]`/`r[45]`/`r[15]`/`r[14]`/`r[17]`/`r[20]`/`r[19]`/
+> `r[22]`, i.e. everything shifted down by one). Do not copy the code block
+> below verbatim for any future work — read the corrected version directly
+> from `apps/calibration/src/main.tsx` instead.
+
 Find:
 
 ```tsx
