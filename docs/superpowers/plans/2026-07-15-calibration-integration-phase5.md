@@ -428,13 +428,14 @@ function isNumberOrNull(value: unknown): value is number | null {
 function parseMpfmRow(value: unknown): MpfmRowInput | null {
   if (typeof value !== "object" || value === null) return null;
   const r = value as Record<string, unknown>;
-  if (!isString(r.timestamp) || typeof r.use !== "boolean") return null;
+  if (!isString(r.timestamp) || typeof r.use !== "boolean" || !isString(r.quality)) return null;
   const numbers = ["duration", "p", "t", "dp", "gvf", "wlr", "oil", "gas", "water", "oilCorr", "gasCorr", "waterCorr"] as const;
   for (const key of numbers) if (!isNumberOrNull(r[key])) return null;
   return {
     timestamp: r.timestamp,
     use: r.use as boolean,
     duration: r.duration as number | null,
+    quality: r.quality,
     p: r.p as number | null,
     t: r.t as number | null,
     dp: r.dp as number | null,
@@ -574,7 +575,7 @@ Replace with:
 
 ```tsx
 type LabResult={sample_id:string,use_flag:number,sampled_at:string,sample_type:string,bsw_pct:number|null,rho_oil_std_kgm3:number|null,rho_gas_std_kgsm3:number|null,rho_water_std_kgm3:number|null,fe:number|null,rs:number|null,method:string,report_id:string,status:string};
-type MpfmExtractRow={timestamp:string,use:boolean,duration:number|null,p:number|null,t:number|null,dp:number|null,gvf:number|null,wlr:number|null,oil:number|null,gas:number|null,water:number|null,oilCorr:number|null,gasCorr:number|null,waterCorr:number|null};
+type MpfmExtractRow={timestamp:string,use:boolean,duration:number|null,quality:string,p:number|null,t:number|null,dp:number|null,gvf:number|null,wlr:number|null,oil:number|null,gas:number|null,water:number|null,oilCorr:number|null,gasCorr:number|null,waterCorr:number|null};
 type SeparatorExtractRow={timestamp:string,use:boolean,durationH:number|null,quality:string,pressureBarg:number|null,temperatureC:number|null,oilGvLineM3:number|null,oilRhoCoriolisKgm3:number|null,oilMassDirectT:number|null,gasMassT:number|null,waterMassT:number|null,gasStdKsm3:number|null,waterVolM3:number|null,sourceRef:string};
 ```
 
@@ -606,7 +607,7 @@ async function parseMpfmWindow(file:File,tag:string,start:string,end:string):Pro
   const timestamp=`${date}T${hour}:00`;
   const t=new Date(timestamp).getTime();
   if(Number.isNaN(t)||t<startTime||t>endTime) continue;
-  out.push({timestamp,use:true,duration:1,p:toNum(r[45]),t:toNum(r[46]),dp:null,gvf:null,wlr:null,oil:toNum(r[16]),gas:toNum(r[15]),water:toNum(r[18]),oilCorr:toNum(r[21]),gasCorr:toNum(r[20]),waterCorr:toNum(r[23])});
+  out.push({timestamp,use:true,duration:1,quality:'',p:toNum(r[45]),t:toNum(r[46]),dp:null,gvf:null,wlr:null,oil:toNum(r[16]),gas:toNum(r[15]),water:toNum(r[18]),oilCorr:toNum(r[21]),gasCorr:toNum(r[20]),waterCorr:toNum(r[23])});
  }
  return out;
 }
