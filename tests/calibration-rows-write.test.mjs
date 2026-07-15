@@ -50,7 +50,7 @@ async function seededDb() {
 }
 
 function mpfmRow(timestamp, oil) {
-  return { timestamp, use: true, duration: 1, p: 116, t: 68, dp: null, gvf: null, wlr: null, oil, gas: 50, water: 0, oilCorr: null, gasCorr: null, waterCorr: null };
+  return { timestamp, use: true, duration: 1, quality: "", p: 116, t: 68, dp: null, gvf: null, wlr: null, oil, gas: 50, water: 0, oilCorr: null, gasCorr: null, waterCorr: null };
 }
 
 function separatorRow(timestamp, oilMass) {

@@ -15,6 +15,7 @@ export interface MpfmRowInput {
   timestamp: string;
   use: boolean;
   duration: number | null;
+  quality: string;
   p: number | null;
   t: number | null;
   dp: number | null;
@@ -46,10 +47,10 @@ export interface SeparatorRowInput {
 }
 
 const UPSERT_MPFM_ROW_SQL = `INSERT INTO calibration_mpfm_rows
-  (campaign_id, condition, timestamp, use_flag, duration_h, pressure_barg, temperature_c, dp_kpa, gvf_pct, wlr_pct, oil_uncorr_t, gas_uncorr_t, water_uncorr_t, oil_corr_t, gas_corr_t, water_corr_t)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  (campaign_id, condition, timestamp, use_flag, duration_h, quality, pressure_barg, temperature_c, dp_kpa, gvf_pct, wlr_pct, oil_uncorr_t, gas_uncorr_t, water_uncorr_t, oil_corr_t, gas_corr_t, water_corr_t)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT (campaign_id, condition, timestamp) DO UPDATE SET
-    use_flag = excluded.use_flag, duration_h = excluded.duration_h,
+    use_flag = excluded.use_flag, duration_h = excluded.duration_h, quality = excluded.quality,
     pressure_barg = excluded.pressure_barg, temperature_c = excluded.temperature_c,
     dp_kpa = excluded.dp_kpa, gvf_pct = excluded.gvf_pct, wlr_pct = excluded.wlr_pct,
     oil_uncorr_t = excluded.oil_uncorr_t, gas_uncorr_t = excluded.gas_uncorr_t, water_uncorr_t = excluded.water_uncorr_t,
@@ -82,7 +83,7 @@ export async function saveCalibrationRows(
   const statements = [
     ...mpfmRows.map((row) =>
       db.prepare(UPSERT_MPFM_ROW_SQL).bind(
-        id, condition, row.timestamp, row.use ? 1 : 0, row.duration,
+        id, condition, row.timestamp, row.use ? 1 : 0, row.duration, row.quality,
         row.p, row.t, row.dp, row.gvf, row.wlr,
         row.oil, row.gas, row.water, row.oilCorr, row.gasCorr, row.waterCorr,
       ),
