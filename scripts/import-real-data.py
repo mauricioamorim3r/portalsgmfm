@@ -194,7 +194,8 @@ def add_separator(path: Path, statements: list[str]):
     source_sql, source_ref = source_insert(path, "separador_teste", "3 fases", min(days), max(days), len(records))
     statements.append(source_sql)
     for sheet, row_number, production_day, hour, definition, cells in records:
-        get = lambda index: number(cells[index]) if index is not None and index < len(cells) else None
+        def get(index, cells=cells):
+            return number(cells[index]) if index is not None and index < len(cells) else None
         values = [sheet, row_number, production_day, hour, definition["phase"], definition["tag"], get(definition["pressure"]), get(definition["temperature"]), get(definition["volume"]), get(definition["mass"]), get(definition["flow"])]
         statements.append(
             "INSERT OR IGNORE INTO separator_measurements "

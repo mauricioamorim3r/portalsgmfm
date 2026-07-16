@@ -15,11 +15,14 @@ import io
 import zipfile
 from datetime import date, datetime
 from pathlib import Path
+from typing import Any
 
 from openpyxl import load_workbook
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 
-def sql_value(value):
+def sql_value(value: Any) -> str:
     if value is None or value == "":
         return "NULL"
     if isinstance(value, bool):
@@ -31,7 +34,7 @@ def sql_value(value):
     return "'" + str(value).replace("'", "''") + "'"
 
 
-def number(value):
+def number(value: Any) -> float | None:
     if value in (None, ""):
         return None
     try:
@@ -41,7 +44,7 @@ def number(value):
         return None
 
 
-def load_campaign_workbook(zip_path: Path):
+def load_campaign_workbook(zip_path: Path) -> tuple[Workbook, str, str]:
     with zipfile.ZipFile(zip_path) as archive:
         [xlsx_name] = [name for name in archive.namelist() if name.startswith("upload/") and name.endswith(".xlsx")]
         xlsx_bytes = archive.read(xlsx_name)
@@ -49,11 +52,11 @@ def load_campaign_workbook(zip_path: Path):
     return load_workbook(io.BytesIO(xlsx_bytes), data_only=True), Path(xlsx_name).name, sha256
 
 
-def cell(ws, row, col=2):
+def cell(ws: Worksheet, row: int, col: int = 2) -> Any:
     return ws.cell(row=row, column=col).value
 
 
-def add_campaign(wb, file_name: str, sha256: str, statements: list[str]) -> str:
+def add_campaign(wb: Workbook, file_name: str, sha256: str, statements: list[str]) -> str:
     ws = wb["01_CAMPANHA"]
     campaign_id = cell(ws, 5)
     values = {
@@ -112,7 +115,7 @@ def add_campaign(wb, file_name: str, sha256: str, statements: list[str]) -> str:
     return campaign_ref
 
 
-def add_mpfm_rows(wb, campaign_ref: str, statements: list[str]):
+def add_mpfm_rows(wb: Workbook, campaign_ref: str, statements: list[str]) -> None:
     ws = wb["IN_01_MPFM"]
     for row in range(6, ws.max_row + 1):
         vals = [ws.cell(row=row, column=c).value for c in range(1, 18)]
@@ -159,7 +162,7 @@ def add_separator_rows(wb, campaign_ref: str, statements: list[str]):
         )
 
 
-def add_lab_results(wb, campaign_ref: str, statements: list[str]):
+def add_lab_results(wb: Workbook, campaign_ref: str, statements: list[str]) -> None:
     ws = wb["IN_03_LAB"]
     for row in range(6, ws.max_row + 1):
         vals = [ws.cell(row=row, column=c).value for c in range(1, 15)]
@@ -182,7 +185,7 @@ def add_lab_results(wb, campaign_ref: str, statements: list[str]):
         )
 
 
-def add_pvt_records(wb, campaign_ref: str, statements: list[str]):
+def add_pvt_records(wb: Workbook, campaign_ref: str, statements: list[str]) -> None:
     ws = wb["IN_04_PVT"]
     for row in range(6, ws.max_row + 1):
         vals = [ws.cell(row=row, column=c).value for c in range(1, 18)]
@@ -205,7 +208,7 @@ def add_pvt_records(wb, campaign_ref: str, statements: list[str]):
         )
 
 
-def add_k_applications(wb, campaign_ref: str, statements: list[str]):
+def add_k_applications(wb: Workbook, campaign_ref: str, statements: list[str]) -> None:
     ws = wb["IN_05_K"]
     for row in range(6, ws.max_row + 1):
         vals = [ws.cell(row=row, column=c).value for c in range(1, 13)]
@@ -226,7 +229,7 @@ def add_k_applications(wb, campaign_ref: str, statements: list[str]):
         )
 
 
-def add_uncertainty(wb, campaign_ref: str, statements: list[str]):
+def add_uncertainty(wb: Workbook, campaign_ref: str, statements: list[str]) -> None:
     ws = wb["IN_06_INCERTEZA"]
     for row in range(6, ws.max_row + 1):
         vals = [ws.cell(row=row, column=c).value for c in range(1, 11)]
@@ -247,7 +250,7 @@ def add_uncertainty(wb, campaign_ref: str, statements: list[str]):
         )
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--zip", type=Path, default=Path("Portal_MPFM_Riser_P4_v1.zip"))
     parser.add_argument("--output", type=Path, default=Path("drizzle/0003_calibration_riser_p4_campaign.sql"))
