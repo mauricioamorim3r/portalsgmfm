@@ -743,6 +743,7 @@ function SeparadorTab({
       step="any"
       value={row[k] == null ? "" : String(row[k])}
       onChange={(e) => set(i, { [k]: e.target.value === "" ? null : Number(e.target.value) } as any)}
+      data-testid={`sep-${String(k)}-${i}`}
     />
   );
   return (
@@ -759,17 +760,17 @@ function SeparadorTab({
           <div className="sp" />
           <div className="filters">
             Filtro:
-            <select value={filter} onChange={(e) => setFilter(e.target.value as any)}>
+            <select value={filter} onChange={(e) => setFilter(e.target.value as any)} data-testid="sep-filter">
               <option value="ALL">Todas</option>
               <option value="AS_FOUND">As-Found</option>
               <option value="POST_K">Pós-K</option>
             </select>
           </div>
-          <button onClick={() => add("AS_FOUND")}>
+          <button onClick={() => add("AS_FOUND")} data-testid="sep-add-as">
             <Plus size={13} />
             As-Found
           </button>
-          <button onClick={() => add("POST_K")}>
+          <button onClick={() => add("POST_K")} data-testid="sep-add-post">
             <Plus size={13} />
             Pós-K
           </button>
@@ -824,6 +825,7 @@ function SeparadorTab({
                         type="checkbox"
                         checked={!!row.use_flag}
                         onChange={(e) => set(i, { use_flag: e.target.checked ? 1 : 0 })}
+                        data-testid={`sep-usar-${i}`}
                       />
                     </td>
                     <td>{numCell(row, i, "duration_h")}</td>
@@ -846,7 +848,7 @@ function SeparadorTab({
                     </td>
                     <td>
                       <div className="row-actions">
-                        <button onClick={() => del(i)} title="Remover">
+                        <button onClick={() => del(i)} title="Remover" data-testid={`sep-del-${i}`}>
                           <Trash2 size={14} />
                         </button>
                       </div>
