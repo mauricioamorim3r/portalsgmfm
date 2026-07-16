@@ -1,0 +1,31 @@
+{
+  "summary": "Frontend-only testing of new standalone MPFM Calibração v2 SPA at preview URL (vite preview on port 3000). App loads correctly, SQLite (sql.js) initializes, all 10 navigation tabs render, Campanha save works, MPFM inline add/edit/delete works, Importação error message displays in pt-BR when dates missing, Nova campanha modal creates campaigns that appear in selector, persistence survives page reload (SQLite blob stored in localStorage key 'mpfm-calibration-v2-db' ~27KB), Excel export triggers download with proper filename. Zero console errors. One notable gap: Separador tab is missing the data-testid attributes on its add/delete/edit controls (spec expected sep-add-as, sep-add-post, sep-oil-0, sep-del-0, sep-filter — buttons exist by text but have no testids).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Separador tab", "issue": "Missing data-testid attributes on the '+ As-Found', '+ Pós-K', filter dropdown, row inputs (oil/gas/water) and delete buttons. Only 'separador-page' testid exists. Spec required sep-add-as, sep-add-post, sep-filter, sep-oil-0..N, sep-del-0..N (mirroring MPFM). Buttons work when clicked by text.", "selector": "[data-testid=\"separador-page\"] button", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Campanha (date fields) & Importação", "issues": ["Uses native browser date input (mm/dd/yyyy placeholder) instead of a localized/shadcn date picker — inconsistent with pt-BR locale of rest of UI."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Add data-testid attributes to Separador tab controls: sep-add-as, sep-add-post, sep-filter, sep-oil-{i}, sep-gas-{i}, sep-water-{i}, sep-del-{i}, sep-usar-{i} to match the MPFM tab pattern and the review spec.",
+    "(Optional/nit) Consider a pt-BR date picker or format hint for the Campanha date fields; native input shows mm/dd/yyyy which conflicts with rest of the UI language."
+  ],
+  "critical_code_review_comments": [
+    "main.tsx is ~1000 lines with all React components in a single file — recommend splitting per-tab (CampanhaTab, MPFMTab, SeparadorTab, ImportacaoTab, RelatoriosTab, NovaCampanhaModal) for maintainability.",
+    "Two 'Export Excel' buttons wired to the same action exist: header-export-excel-btn (top-right) and export-excel-btn (Relatórios tab). Both work; verify this is intentional UX, otherwise dedupe.",
+    "16-gate matrix G01–G16 renders as <span> elements, not <button>, so they are not keyboard/focus accessible even though visually they look clickable."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only)", "frontend": "~93% (all specified flows work; only gap is missing testids on Separador controls)"},
+  "test_credentials": "N/A — 100% client-side, no auth",
+  "seed_data_creation": "Created transient in-browser campaigns TEST-CAL-999 and PERSIST-TEST-1 via Nova Campanha modal to validate persistence and selector switching. Data lives only in the test browser context's localStorage.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Preview URL: https://5c8e2780-5a2e-4c30-8b06-d4d68f9dd1da.preview.emergentagent.com/ (port 3000, vite preview serving /app/apps/calibration-v2). Loading screen 'Inicializando SQLite local…' takes ~2-3s. Navigation tabs use data-testid=nav-{name-lowercase-hyphen}, e.g. nav-visão-geral, nav-mpfm, nav-relatórios (accents preserved). Header buttons: new-campaign-btn, delete-campaign-btn, campaign-selector, export-db-btn, header-export-excel-btn. Modal fields: new-campaign-{id,asset,well,tag,serial,reference,revision,nature,responsible,approver,submit}. MPFM row testids: mpfm-oil-{i}, mpfm-gas-{i}, mpfm-water-{i}, mpfm-oilCorr-{i}, mpfm-gasCorr-{i}, mpfm-waterCorr-{i}, mpfm-del-{i}. Delete confirmation uses native window.confirm (handle with page.on('dialog', d => d.accept())). LocalStorage keys: mpfm-calibration-v2-db (SQLite blob, ~27KB after seed) and mpfm-calibration-v2-active (active campaign id).",
+  "rca of the issue": "Separador tab missing testids: engineer likely copy-adapted the Separador tab from an earlier scaffold and forgot to port the data-testid pattern used on MPFM buttons/inputs. The functional behaviour (add row, edit inline, delete) is intact — only automation hooks are missing. Fix is a mechanical edit in main.tsx Separador component to add the testids mirroring MPFM."
+}
