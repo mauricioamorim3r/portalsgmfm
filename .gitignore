@@ -20,3 +20,8 @@ docs/inventory/*.csv
 # (e.g. calibration app exports). Only derived numeric rows get committed,
 # via the scripts/import-*.py pipelines — never the originals.
 *.zip
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
